@@ -1,0 +1,11 @@
+[package]
+name = "bpf-for-test"
+version = "0.1.0"
+edition = "2018"
+license = "WTFPL"
+
+[dependencies]
+solana-program = "1.4.3"
+
+[lib]
+crate-type = ["cdylib"]
