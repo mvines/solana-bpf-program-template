@@ -5,15 +5,16 @@ edition = "2018"
 license = "WTFPL"
 
 [dependencies]
-solana-program = "1.4.4"
+solana-program = "1.4.5"
+
+[features]
+test-bpf = []
 
 [dev-dependencies]
 assert_matches = "1.4.0"
-solana-program-test = "1.4.4"
-solana-sdk = "1.4.4"
+solana-program-test = "1.4.5"
+solana-sdk = "1.4.5"
 tokio = { version = "0.3", features = ["macros"]}
 
 [lib]
 crate-type = ["cdylib"]
-
-[workspace]
