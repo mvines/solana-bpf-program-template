@@ -6,6 +6,7 @@ license = "WTFPL"
 
 [dependencies]
 solana-program = "1.4.4"
+spl-token = { version = "3.0.0-pre1", features  = ["no-entrypoint"] }
 
 [dev-dependencies]
 assert_matches = "1.4.0"

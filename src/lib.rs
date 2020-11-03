@@ -9,10 +9,11 @@ fn process_instruction(
     instruction_data: &[u8],
 ) -> ProgramResult {
     info!(&format!(
-        "process_instruction: {}: {} accounts, data={:?}",
+        "process_instruction: {}: {} accounts, data={:?} with spl-token {}",
         program_id,
         accounts.len(),
-        instruction_data
+        instruction_data,
+        spl_token::id(),
     ));
     Ok(())
 }
