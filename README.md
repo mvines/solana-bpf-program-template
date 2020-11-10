@@ -1,6 +1,6 @@
 ### Environment Setup
 1. Install Rust from https://rustup.rs/
-2. Install Solana v1.4.5 or later from https://docs.solana.com/cli/install-solana-cli-tools#use-solanas-install-tool
+2. Install Solana v1.4.6 or later from https://docs.solana.com/cli/install-solana-cli-tools#use-solanas-install-tool
 
 ### Build and test for program compiled natively
 ```
