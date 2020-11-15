@@ -3,6 +3,7 @@ name = "bpf-program-template"
 version = "0.1.0"
 edition = "2018"
 license = "WTFPL"
+publish = false
 
 [dependencies]
 solana-program = "1.4.6"
