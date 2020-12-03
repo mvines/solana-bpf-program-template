@@ -1,5 +1,5 @@
 use solana_program::{
-    account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, info, pubkey::Pubkey,
+    account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, msg, pubkey::Pubkey,
 };
 
 entrypoint!(process_instruction);
@@ -8,12 +8,12 @@ fn process_instruction(
     accounts: &[AccountInfo],
     instruction_data: &[u8],
 ) -> ProgramResult {
-    info!(&format!(
+    msg!(
         "process_instruction: {}: {} accounts, data={:?}",
         program_id,
         accounts.len(),
         instruction_data
-    ));
+    );
     Ok(())
 }
 

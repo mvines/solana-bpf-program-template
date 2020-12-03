@@ -6,15 +6,15 @@ license = "WTFPL"
 publish = false
 
 [dependencies]
-solana-program = "1.4.6"
+solana-program = "1.4.14"
 
 [features]
 test-bpf = []
 
 [dev-dependencies]
 assert_matches = "1.4.0"
-solana-program-test = "1.4.6"
-solana-sdk = "1.4.6"
+solana-program-test = "1.4.14"
+solana-sdk = "1.4.14"
 tokio = { version = "0.3", features = ["macros"]}
 
 [lib]
