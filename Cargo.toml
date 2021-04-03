@@ -6,16 +6,16 @@ license = "WTFPL"
 publish = false
 
 [dependencies]
-solana-program = "=1.5.15"
+solana-program = "1.6.2"
 
 [features]
 test-bpf = []
 
 [dev-dependencies]
 assert_matches = "1.4.0"
-solana-program-test = "=1.5.15"
-solana-sdk = "=1.5.15"
-solana-validator = "=1.5.15"
+solana-program-test = "1.6.2"
+solana-sdk = "1.6.2"
+solana-validator = "1.6.2"
 
 [lib]
 crate-type = ["cdylib", "lib"]
