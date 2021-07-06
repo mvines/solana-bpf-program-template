@@ -1,19 +1,54 @@
 use solana_program::{
-    account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, msg, pubkey::Pubkey,
+    account_info::{next_account_info, AccountInfo},
+    entrypoint,
+    entrypoint::ProgramResult,
+    hash::Hash,
+    msg,
+    program_error::ProgramError,
+    pubkey::Pubkey,
+    sysvar,
 };
+use std::convert::TryInto;
 
 entrypoint!(process_instruction);
 fn process_instruction(
-    program_id: &Pubkey,
+    _program_id: &Pubkey,
     accounts: &[AccountInfo],
-    instruction_data: &[u8],
+    _instruction_data: &[u8],
 ) -> ProgramResult {
-    msg!(
-        "process_instruction: {}: {} accounts, data={:?}",
-        program_id,
-        accounts.len(),
-        instruction_data
-    );
+    let accounts_iter = &mut accounts.iter();
+    let sysvar_slot_history = next_account_info(accounts_iter)?;
+
+    /*
+        Decoding the SlotHashes sysvar using `from_account_info` is too expensive.
+        For example this statement will exceed the current BPF compute unit budget:
+
+            let slot_hashes = SlotHashes::from_account_info(&sysvar_slot_history).unwrap();
+
+        Instead manually decode the sysvar.
+    */
+
+    if *sysvar_slot_history.key != sysvar::slot_hashes::id() {
+        msg!("Invalid SlotHashes sysvar");
+        return Err(ProgramError::InvalidArgument);
+    }
+
+    let data = sysvar_slot_history.try_borrow_data()?;
+
+    let num_slot_hashes = u64::from_le_bytes(data[0..8].try_into().unwrap());
+    let mut pos = 8;
+
+    for _i in 0..num_slot_hashes {
+        let slot = u64::from_le_bytes(data[pos..pos + 8].try_into().unwrap());
+        pos += 8;
+        let hash = &data[pos..pos + 32];
+        pos += 32;
+
+        if slot == 54943128 {
+            msg!("Found slot {}, hash {}", slot, Hash::new(hash));
+        }
+    }
+
     Ok(())
 }
 
@@ -22,7 +57,11 @@ mod test {
     use {
         super::*,
         assert_matches::*,
-        solana_program::instruction::{AccountMeta, Instruction},
+        solana_program::{
+            instruction::{AccountMeta, Instruction},
+            native_token::sol_to_lamports,
+            sysvar,
+        },
         solana_program_test::*,
         solana_sdk::{signature::Signer, transaction::Transaction},
     };
@@ -31,18 +70,28 @@ mod test {
     async fn test_transaction() {
         let program_id = Pubkey::new_unique();
 
-        let (mut banks_client, payer, recent_blockhash) = ProgramTest::new(
+        let mut program_test = ProgramTest::new(
             "bpf_program_template",
             program_id,
             processor!(process_instruction),
-        )
-        .start()
-        .await;
+        );
+
+        // Replace the SlotHashes sysvar will a fully populated version that was grabbed off Mainnet
+        // Beta by running:
+        //      solana account SysvarS1otHashes111111111111111111111111111 -o slot_hashes.bin
+        program_test.add_account_with_file_data(
+            sysvar::slot_hashes::id(),
+            sol_to_lamports(1.),
+            Pubkey::default(),
+            "slot_hashes.bin",
+        );
+
+        let (mut banks_client, payer, recent_blockhash) = program_test.start().await;
 
         let mut transaction = Transaction::new_with_payer(
             &[Instruction {
                 program_id,
-                accounts: vec![AccountMeta::new(payer.pubkey(), false)],
+                accounts: vec![AccountMeta::new(sysvar::slot_hashes::id(), false)],
                 data: vec![1, 2, 3],
             }],
             Some(&payer.pubkey()),
