@@ -17,7 +17,9 @@ fn test_validator_transaction() {
     let (test_validator, payer) = TestValidatorGenesis::default()
         .add_program("bpf_program_template", program_id)
         .start();
-    let (rpc_client, recent_blockhash, _fee_calculator) = test_validator.rpc_client();
+    let rpc_client = test_validator.get_rpc_client();
+
+    let blockhash = rpc_client.get_latest_blockhash().unwrap();
 
     let mut transaction = Transaction::new_with_payer(
         &[Instruction {
@@ -27,7 +29,7 @@ fn test_validator_transaction() {
         }],
         Some(&payer.pubkey()),
     );
-    transaction.sign(&[&payer], recent_blockhash);
+    transaction.sign(&[&payer], blockhash);
 
     assert_matches!(rpc_client.send_and_confirm_transaction(&transaction), Ok(_));
 }
