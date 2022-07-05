@@ -6,17 +6,17 @@ license = "WTFPL"
 publish = false
 
 [dependencies]
-solana-program = "=1.10.21"
+solana-program = "=1.11.1"
 
 [features]
 test-bpf = []
 
 [dev-dependencies]
 assert_matches = "1.4.0"
-solana-program-test = "=1.10.21"
-solana-sdk = "=1.10.21"
-solana-validator = "=1.10.21"
-solana-logger = "=1.10.21"
+solana-program-test = "=1.11.1"
+solana-sdk = "=1.11.1"
+solana-validator = "=1.11.1"
+solana-logger = "=1.11.1"
 
 [lib]
 crate-type = ["cdylib", "lib"]
