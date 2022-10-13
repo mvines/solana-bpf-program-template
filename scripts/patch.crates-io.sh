@@ -50,7 +50,9 @@ solana-program = { path = "$solana_dir/sdk/program" }
 solana-program-test = { path = "$solana_dir/program-test" }
 solana-remote-wallet = { path = "$solana_dir/remote-wallet"}
 solana-sdk = { path = "$solana_dir/sdk" }
+solana-test-validator = { path = "$solana_dir/test-validator" }
 solana-validator = { path = "$solana_dir/validator"}
+solana-zk-token-sdk = { path = "$solana_dir/zk-token-sdk" }
 PATCH
   fi
 done
