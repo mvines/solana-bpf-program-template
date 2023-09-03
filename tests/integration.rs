@@ -5,6 +5,7 @@ use {
     solana_program::{
         instruction::{AccountMeta, Instruction},
         pubkey::Pubkey,
+        sysvar,
     },
     solana_sdk::{signature::Signer, transaction::Transaction},
     solana_validator::test_validator::*,
@@ -25,7 +26,7 @@ fn test_validator_transaction() {
     let mut transaction = Transaction::new_with_payer(
         &[Instruction {
             program_id,
-            accounts: vec![AccountMeta::new(payer.pubkey(), false)],
+            accounts: vec![AccountMeta::new_readonly(sysvar::rent::id(), false)],
             data: vec![1, 2, 3],
         }],
         Some(&payer.pubkey()),

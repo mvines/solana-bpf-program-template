@@ -1,5 +1,11 @@
 use solana_program::{
-    account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, msg, pubkey::Pubkey,
+    account_info::{next_account_info, AccountInfo},
+    entrypoint,
+    entrypoint::ProgramResult,
+    msg,
+    pubkey::Pubkey,
+    rent::Rent,
+    sysvar::Sysvar,
 };
 
 entrypoint!(process_instruction);
@@ -14,6 +20,15 @@ fn process_instruction(
         accounts.len(),
         instruction_data
     );
+
+    let account_info_iter = &mut accounts.iter();
+    let rent_sysvar_account_info = next_account_info(account_info_iter)?;
+    let rent = &Rent::from_account_info(rent_sysvar_account_info)?;
+    msg!(
+        "Rent exemption minimum lamport balance for an account that's 123 bytes in size: {}",
+        rent.minimum_balance(123)
+    );
+
     Ok(())
 }
 
@@ -22,7 +37,10 @@ mod test {
     use {
         super::*,
         assert_matches::*,
-        solana_program::instruction::{AccountMeta, Instruction},
+        solana_program::{
+            instruction::{AccountMeta, Instruction},
+            sysvar,
+        },
         solana_program_test::*,
         solana_sdk::{signature::Signer, transaction::Transaction},
     };
@@ -42,7 +60,7 @@ mod test {
         let mut transaction = Transaction::new_with_payer(
             &[Instruction {
                 program_id,
-                accounts: vec![AccountMeta::new(payer.pubkey(), false)],
+                accounts: vec![AccountMeta::new_readonly(sysvar::rent::id(), false)],
                 data: vec![1, 2, 3],
             }],
             Some(&payer.pubkey()),
